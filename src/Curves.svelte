@@ -4,18 +4,18 @@ import { range } from 'd3';
 import { onMount } from 'svelte';
 
 export let sig, cfg, plot, cn, gridarea;
-let w=0, h=0;
+let divw=0, divh=0;
 let drag_point = null;
 let s, mounted = false;
 
 
 function solve(do_solve, msg) {
-  console.log(`in solve: ${msg}, do_solve=${do_solve}`);
+  // console.log(`in solve: ${msg}, do_solve=${do_solve}`);
   if (! do_solve) return;
   const NSTEPS = 50;
   var start_alpha = plot.alpha;
   var end_alpha = plot.solutionAlpha();
-  console.log(`in solve: ${end_alpha}`);
+  // console.log(`in solve: ${end_alpha}`);
 
   function transition(step, nsteps) {
     if (step == nsteps) {
@@ -66,8 +66,9 @@ function update() {
 
 function resize(width, height) {
   if (! mounted) return;
-  // console.log(`in resize with ${width} x ${height}`);
   plot.resize(width, height);
+  // console.log(`in Curves resize with component dims: ${width} x ${height}, ctx dims: ${plot.ctx.width} x ${plot.ctx.height}`);
+  // console.log(`in Curves resize with ${width} x ${height}`);
   plot.touch++;
 }
 
@@ -76,7 +77,7 @@ function resize(width, height) {
 onMount(() => {
   s = new Sync(sig, cn, update);
   mounted = true;
-  resize(w, h);
+  resize(divw, divh);
 });
 
 function onMouseDown(evt) {
@@ -103,7 +104,7 @@ function onMouseUp(evt) {
   drag_point = null;
 }
 
-$: resize(w, h);
+$: resize(divw, divh);
 
 </script>
 
@@ -115,7 +116,7 @@ $: resize(w, h);
   w and h variables.  Since both div and svg elements are placed in the same
   grid cell via the 'gridarea' class, the dimensions are the same.
 -->
-<div class='framed {gridarea} z3' bind:clientWidth={w} bind:clientHeight={h}></div>
+<div class='framed {gridarea} z3' bind:clientWidth={divw} bind:clientHeight={divh}></div>
 <svg class='framed {gridarea}'
      on:mousemove={onMouseMove}
      on:mouseup={onMouseUp}

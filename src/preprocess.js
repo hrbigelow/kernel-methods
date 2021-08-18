@@ -1,5 +1,14 @@
 import marked from 'marked';
+import katex from 'katex';
+// import { node_parser } from 'node-html-parser';
 import { parse as html_parse } from 'node-html-parser';
+
+function wrap_for_svelte(str) {
+   return `{@html \`${str.replace(/\\/g, '\\\\')}\`}`;
+}
+
+// this should accumulate between calls
+var katex_macros = {};
 
 /*
  * Anything enclosed in $$ .. $$
@@ -22,17 +31,26 @@ const math_block = {
       var token = {
         type: 'math_block',
         raw: match[0],
-        text: match[0]
+        text: match[1]
       };
       return token;
     }
   },
+
   renderer(token) {
-    // console.log(`in math_block renderer with ${token}`);
-    // console.log(token);
     var tok = token.text.replace(/\\mbox/g, '\\text');
-    tok = tok.replace(/\\/g, '\\\\');
-    return `{@html \`${tok}\`}`;
+    try {
+      tok = katex.renderToString(tok, {
+        macros: katex_macros,
+        throwOnError: true,
+        globalGroup: true,
+        displayMode: true
+      });
+    } catch (err) {
+      console.error(`Got ${err} processing math_block:\n\n${token.text}`);
+      throw new Error('Error in math_block');
+    }
+    return wrap_for_svelte(tok);
   }
 };
 
@@ -48,19 +66,52 @@ const math_inline = {
       return {
         type: 'math_inline',
         raw: match[0],
-        text: match[0]
+        text: match[1]
       };
     }
   },
+
   renderer(token) {
-    var tok = token.text.replace(/\\/g, '\\\\');
-    // console.log(`math_inline': rendering ${tok}`);
-    return `{@html \`${tok}\`}`;
+    var num_macros = Object.keys(katex_macros).length;
+    var tok = token.text;
+    tok = katex.renderToString(tok, {
+      macros: katex_macros,
+      throwOnError: true,
+      displayMode: false,
+      globalGroup: true
+    });
+
+    // console.log(`in inline: num macros: ${Object.keys(katex_macros).length}`);
+    return wrap_for_svelte(tok);
+  }
+};
+
+// ${ verbatim text }$  => verbatim text
+const verbatim = {
+  name: 'verbatim',
+  level: 'block',
+  start(src) { return src.match(/\${/s)?.index; },
+  tokenizer(src, tokens) {
+    const rule = /^\${(.+?)}\$/s;
+    const match = rule.exec(src);
+    if (match) {
+      return {
+        type: 'verbatim',
+        raw: match[0],
+        text: match[1]
+      };
+    }
+  },
+
+  renderer(token) {
+    console.log(`in verbatim, got ${token.text}`);
+    return token.text;
   }
 };
 
 
-marked.use({ extensions: [math_inline, math_block] });
+
+marked.use({ extensions: [math_inline, math_block, verbatim] });
 
 
 function get_toks(content) {

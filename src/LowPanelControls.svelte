@@ -1,8 +1,9 @@
 <script>
 import { Sync } from './sync';
 import { numberDisplay } from './presentation';
+import Katex from './Katex.svelte';
 
-export let sig, cn, cfg, plot;
+export let sig, cn, cfg, plot, gridarea;
 
 function update() {
   plot.touch++;
@@ -20,17 +21,17 @@ function h(e) {
 
 </script>
 
-<div class='gb gi'>
+<div class='gb gi {gridarea}'>
   <div class='col1 line'>
-    <span>$\|f\| = $</span>
+    <Katex m={`\|f\| = `}/>
     {plot.invertible ?  numberDisplay(plot.fNorm()) : 'Could not solve'}
   </div>
   <div class='col2 line'>
-    <span>$\|f_\parallel\| = $</span>
+    <Katex m={`\|f_\parallel\| = `}/>
     {plot.invertible ?  numberDisplay(plot.fNormParallel()) : 'Could not solve'}
   </div>
   <div class='col2 row2 line'>
-    <span>$\|f_\perp\| = $</span>
+    <Katex m={`\|f_\perp\| = `}/>
     {plot.invertible ?  numberDisplay(plot.fNormPerp()) : 'Could not solve'}
   </div>
   <div class='col4 row1 line'>
@@ -48,7 +49,7 @@ function h(e) {
              type="checkbox"
              bind:checked={cfg.mu_tracks_x}
              on:change={h}>
-      <span>$\mu$ tracks $x$</span>
+      <span><Katex m={`\mu`}/> tracks <Katex m={`x`}/></span>
     </label>
   </div>
   <div class='col5 row1 line'>
@@ -61,7 +62,7 @@ function h(e) {
     </label>
   </div>
   <div class='col5 row2 line'>
-    <label class='ib'><span>$\sigma$</span>: 
+    <label class='ib'><Katex m={`\sigma`}/>: 
       <input id='set_sigma'
              class='short'
              type="range"

@@ -162,11 +162,12 @@ export class Plot {
     this.init_metrics();
     this.initCurveCache();
 
-    /*
-    for (let i = 0; i != n; i++) 
-      this.y[i] = this.solutionPoint(i);
-      */
-
+    const alpha = this.solutionAlpha();
+    const max_abs = Math.max.apply(null, alpha.map(Math.abs));
+    const factor = Math.min(1.0, 100.0 / max_abs);
+    // console.log(`populate: alpha=${alpha}, max_abs=${max_abs.toFixed(2)}, factor=${factor.toFixed(2)}`);
+    this.y = this.y.map(y => y * factor);
+    
     this.alpha.fill(1.0);
   }
 
@@ -262,6 +263,7 @@ export class Plot {
   }
 
   updateContext(context) {
+    // console.log(`in updateContext with ctx dims: ${this.ctx.width} x ${this.ctx.height}`);
     this.ctx = context;
     this.height = this.ctx.height;
     this.width = this.ctx.width;
@@ -280,7 +282,7 @@ export class Plot {
 
   updateAlpha(delta, index) {
     if (isNaN(delta + this.alpha[index])) {
-      console.log(`updateAlpha got ${delta} and ${this.alpha[index]}`);
+      // console.log(`updateAlpha got ${delta} and ${this.alpha[index]}`);
       return;
     }
     this.alpha[index] += delta;

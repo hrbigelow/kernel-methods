@@ -48,7 +48,7 @@ export class PhiSpace {
   resize(w, h) {
     this.xTou.range([0, w]);
     this.yTov.range([h, 0]);
-    this.plot.resize(w, h);
+    // we don't resize the plot - that is handled in the Curves component.
   }
 
   // update the second basis vector, assuming the kernel with k(v, v) = 1 for

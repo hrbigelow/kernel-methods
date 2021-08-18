@@ -7,6 +7,7 @@ import Curves from './Curves.svelte';
 import PhiSpace from './PhiSpace.svelte';
 import LowPanelControls from './LowPanelControls.svelte';
 import { numberDisplay } from './presentation';
+import K from './K.svelte';
 
 let box = { w: 10, h: 10 };
 
@@ -28,22 +29,27 @@ let sig = writable(0);
 
 </script>
 
-<figure>
-  <div class='gb screen'>
-      <Curves sig={sig} cfg={cfg} cn=1 plot={pp.plot} gridarea='curves'/>
-      <PhiSpace sig={sig} cn=2 cfg={cfg} pp={pp} gridarea='phi'/>
-      <LowPanelControls sig={sig} cfg={cfg} cn=3 plot={pp.plot} />
-      <div>Plane spanned by $\vec\phi_\sigma(\mu_1)$ and $\vec\phi_\sigma(\mu_2)$</div>
-  </div>
-  <figcaption> <b>Left</b>: The curves plot as before with only two curves.
-    <b>Right</b>: The plane in feature space spanned by vectors $\vec\phi(\mu_1)$
-    and $\vec\phi(\mu_2)$ The blue arrow is $\alpha_1 \vec\phi(\mu_1) + \alpha_2
-    \vec\phi(\mu_2)$.
+<figure class='gb screen'>
+    <Curves sig={sig} cfg={cfg} cn=1 plot={pp.plot} gridarea='curves'/>
+    <PhiSpace sig={sig} cn=2 cfg={cfg} pp={pp} gridarea='phi'/>
+    <LowPanelControls sig={sig} cfg={cfg} cn=3 plot={pp.plot} gridarea='panel'/>
+    <div class='caption'>Plane spanned by 
+      <K>{`\vec\phi_\sigma(\mu_1)`}</K> and
+      <K>{`\vec\phi_\sigma(\mu_2)`}</K>
+    </div>
+  <figcaption class='figcap'> <b>Left</b>: The curves plot as before with only two curves.
+      <b>Right</b>: The plane in feature space spanned by vectors <K>{`\vec\phi(\mu_1)`}</K>
+          and <K>{`\vec\phi(\mu_2)`}</K> The blue arrow is 
+      <K>{`\alpha_1 \vec\phi(\mu_1) + \alpha_2 \vec\phi(\mu_2)`}</K>.
   </figcaption>
 </figure>
 
 
 <style>
+
+  figure {
+    grid-column: page;
+  }
 
   .screen {
     height: 60vh;
@@ -51,8 +57,8 @@ let sig = writable(0);
 
   .gb {
     display: grid;
-    grid-template-columns: auto min-content;
-    grid-template-rows: auto min-content;
+    grid-template-columns: [figure-start curves-start] auto [curves-end phi-start] min-content [figure-end phi-end];
+    grid-template-rows: auto min-content min-content;
     row-gap: 5px;
     column-gap: 10px;
     justify-items: center;
@@ -60,16 +66,40 @@ let sig = writable(0);
   }
 
   .gb :global(.curves) {
-    grid-area: 1/1/1/1;
+    grid-column: curves;
+    grid-row: 1;
     align-self: stretch;
     justify-self: stretch;
   }
 
   .gb :global(.phi) {
-    grid-area: 1/2/1/2;
+    grid-column: phi;
+    grid-row: 1;
     align-self: stretch;
     justify-self: stretch;
   }
+
+  .gb :global(.panel) {
+    grid-column: curves;
+    grid-row: 2;
+    align-self: stretch;
+    justify-self: stretch;
+  }
+
+  .gb .caption {
+    grid-column: phi;
+    grid-row: 2;
+    align-self: start;
+    justify-self: stretch;
+  }
+
+  .gb .figcap {
+    grid-column: figure;
+    grid-row: 3;
+    align-self: start;
+    justify-self: stretch;
+  }
+
 
 </style>
 

@@ -1,13 +1,28 @@
 <script>
-    import KernelMethods from './kernel_methods.md'; 
+  import { onMount } from 'svelte';
+  import KernelMethods from './kernel_methods.md';
+  // import KernelMethods from './test.md';
+  import Figure1 from './Figure1.svelte';
+  import Figure2 from './Figure2.svelte';
 
 </script>
 
 <article>
-  <KernelMethods/>
+  <h1 class='title'>The Kernel Method</h1>
+  <KernelMethods>
+    <Figure1 slot='figure1'/>
+    <Figure2 slot='figure2'/>
+  </KernelMethods>
 </article>
 
 <style>
+
+.title {
+  font-size: 40px; 
+  font-weight: 700;
+  line-height: 1.1em;
+  margin: 0 0 0.5rem;
+}
 
 @supports not (display: grid) {
   article
@@ -25,7 +40,7 @@ article {
 }
 
 article {
-  contain: layout style;
+  /* contain: layout style; */
 }
 
 @media(min-width: 768px) {
@@ -52,14 +67,10 @@ article {
   }
 }
 
-:global(article > *) {
+:global(article *) {
   grid-column: text;
 }
 
-:global(figure) {
-  grid-column: page; 
-  contain: layout style;
-}
 
 :global(figcaption) {
   color: rgba(0, 0, 0, 0.6);

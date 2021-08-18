@@ -1,8 +1,9 @@
 <script>
 import { Sync } from './sync';
 import { numberDisplay } from './presentation';
+import K from './K.svelte';
 
-export let sig, cn, cfg, plot;
+export let sig, cn, cfg, plot, gridarea;
 
 function update() {
   plot.touch++;
@@ -19,10 +20,10 @@ function h(evt) {
 
 </script>
 
-<div class='gb'>
+<div class='gb {gridarea}'>
   {#each plot.alpha as a, i}
     <div class='alpha'>
-      <label class='ib'><span>$\alpha_{i}$</span>
+        <label class='ib'><K>{`\alpha_`}{i}</K>
         <input id='update_alpha{i}'
                class='ib slider'
                type=range
@@ -33,10 +34,10 @@ function h(evt) {
       </label>
     </div>
   {/each}
-  <button id='new_data' on:click={h}>New Data</button>
-  <button id='reset_alpha' on:click={h}>Reset <d-math>\alpha</d-math></button>
-  <button id='del_point' on:click={h}>Del Point</button>
-  <button id='add_point' on:click={h}>Add Point</button>
+  <button class='left' id='new_data' on:click={h}>New Data</button>
+  <button class='right' id='reset_alpha' on:click={h}>Reset <K>{`\alpha`}</K></button>
+  <button class='left' id='del_point' on:click={h}>Del Point</button>
+  <button class='right' id='add_point' on:click={h}>Add Point</button>
 </div>
 
 
@@ -50,7 +51,7 @@ function h(evt) {
     align-items: stretch;
     align-content: start;
 
-    grid-template-columns: repeat(2, min-content);
+    grid-template-columns: [alpha-start left-start] min-content [left-end right-start] min-content [right-end alpha-end];
     grid-template-rows: min-content;
   }
 
@@ -58,8 +59,16 @@ function h(evt) {
     display: inline-block;
   }
 
+  .left {
+    grid-column: left;
+  }
+
+  .right {
+    grid-column: right;
+  }
+
   .alpha {
-    grid-column: 1/3;
+    grid-column: alpha;
     white-space: nowrap;
     overflow: hidden;
     width: 12em;

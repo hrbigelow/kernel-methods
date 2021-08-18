@@ -13,11 +13,6 @@ $
 \newcommand\disp[1]{\mathrm{disp}(#1)}
 $
 
-<script>
-import Figure1 from './Figure1.svelte';
-import Figure2 from './Figure2.svelte';
-</script>
-
 
 # Introduction
 
@@ -42,10 +37,7 @@ In the interactive figure, data points $(x_i, y_i)$ are shown as black dots.  Th
 You can adjust the sliders to make the blue curve perfectly fit the $y_i$.  It may be surprising to note that a unique, perfect-fitting $\alpha$ exists for any set of $(x_i, y_i)$ and for any number of points (click 'Add Points' and/or 'New Data' to adjust).
 
 To see why, note that each gray curve's set of values along the $x_i$ produces a vector, which I call the function's *vector of evaluation*.  Denoting the j'th curve as $k_j(x)$, its vector of evaluation is $(k_j(x_1), k_j(x_2), \cdots, k_j(x_n))$, where the order of components is always the order of the $(x_1, x_2, \cdots, x_n)$.  
-
-<Figure1 />
-
-
+${<slot name='figure1' />}$
 
 Note that there isn't any rule that the $x_i$ need be monotonically increasing.  They are simply given in some arbitrary order from the dataset. In the plot, they aren't labeled.  You can adjust the i'th slider and see which curve moves.  The point located horizontally at the peak of that curve is $(x_i, y_i)$.  Ultimately it doesn't matter for the purposes of illustration.  The important thing is that all the gray functions' vectors of evaluation are in the same order.
 
@@ -230,7 +222,7 @@ As mentioned before, this experiment is only for didactic purposes since Kernel 
 
 # Experiments to try with Figure 2
 
-<Figure2 />
+${<slot name='figure2' />}$
 
 Figure 2 left panel shows the same plot with just two functions.  The right panel shows the 2d $\mu$-span, with the gray vectors denoting $\V{\phi_{\mu_1}}$ and $\V{\phi_{\mu_2}}$, and the blue vector $\V{\phi_f} = \sum_i { \alpha_i \V{\phi_{\mu_i}}}$.  The black dot on the right panel shows the parameter vector which fits the data.  Not shown are the $x$-span or the $\V{\phi_{x_i}}$.  However, when $\mu_i = x_i$, they coincide.  In this case, the black dotted lines show the length of the projection of $\V{\phi_f}$ onto each of the $\V{\phi_{\mu_i}}$, which equals $f(x_i)$.  There are a few informative experiments to try.
 
