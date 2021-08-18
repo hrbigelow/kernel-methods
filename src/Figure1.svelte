@@ -7,7 +7,6 @@
   import SliderControls from './SliderControls.svelte';
   import KernelHeatmap from './KernelHeatmap.svelte';
   import KernelMatrix from './KernelMatrix.svelte';
-  import Katex from './Katex.svelte';
   import K from './K.svelte';
 
   export let fullscreen = false;
