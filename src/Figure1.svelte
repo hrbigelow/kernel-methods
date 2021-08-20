@@ -17,6 +17,7 @@
     points: false,
     curves: true,
     solution: true,
+    minsolution: false,
     auto_solve: false,
     mu_tracks_x: true,
     scramble: false,
@@ -51,13 +52,14 @@
   </div>
 </div>
 <figcaption>
-  Interactive plot.  You can drag the black <K>{`(x_i, y_i)`}</K> data points and triangles
+  <b>Figure 1 Interactive plot</b>.  You can drag the black <K>{`(x_i, y_i)`}</K> data points and triangles
   (<K>{`\mu_i`}</K> values).  <b>Top</b>: gray curves are Gaussians centered at the
   <K>{`\mu_i`}</K>.  Blue curve is the <K>{`\vec{\alpha}`}</K> linear combination of the gray curves.
   <b>Bottom left</b>: A heatmap showing the family of Gaussians with the same
   <K>{`\sigma`}</K> at every <K>{`\mu`}</K> value.  Red dots show the locations of evaluation
   points.  <b>Bottom right</b>:  The matrix of values of evaluation points
-  organized by <K>{`\mu_i`}</K> and <K>{`x_i`}</K>.  Other details provided in text.  
+  organized by <K>{`\mu_i`}</K> and <K>{`x_i`}</K>.  Heatmap and Matrix color
+  scale is 0 to 1, white to blue. Other details provided in text.  
     <a href="full.html">Full Page Figure</a>.
 </figcaption>
 </figure>

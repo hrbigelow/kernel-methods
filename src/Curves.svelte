@@ -35,6 +35,81 @@ function solve(do_solve, msg) {
 }
 
 
+/*
+Synopsis:
+1. show just data points
+2. add gray curves, with mu_i in center
+3. move the mu_i towards the data points
+4. add blue and orange curves (only blue will be visible)
+5. solve for alpha
+6. move mu_i towards center
+7. move mu_i back
+
+*/
+function intro_movie() {
+
+  const start_alpha = Array.from(plot.alpha);
+  const solution_alpha = plot.solutionAlpha();
+
+  function init(progress) {
+    cfg.curves = false;
+    cfg.minsolution = false;
+    cfg.solution = false;
+    cfg.show_data = true; 
+    plot.push_mu_to_center(1.0);
+  }
+
+  function enter(progress) {
+    cfg.curves = true; 
+    cfg.solution = true;
+  }
+
+  function expand_mus(progress) {
+    const factor = 0.5 * (Math.sin(Math.PI * (progress - 0.5)) + 1);
+    plot.push_mu_to_center(1.0 - factor);
+    plot.touch++;
+  }
+
+  function solve(progress) {
+    const factor = 0.5 * (Math.sin(Math.PI * (progress - 0.5)) + 1);
+    for (let i = 0; i != plot.n; i++) 
+      plot.alpha[i] = (1.0 - factor) * start_alpha[i] + factor * solution_alpha[i];
+  }
+
+  function wiggle(progress) {
+    const factor = Math.sin(Math.PI * 2 * progress) * 0.35;
+    cfg.minsolution = true;
+    plot.push_mu_to_center(factor);
+    plot.alpha = plot.solutionAlpha();
+  }
+
+  var scenes = [init, enter, expand_mus, solve, wiggle];
+  const scene_steps = [35, 25, 25, 80, 100]; 
+
+
+  function transition(scene_idx, step) {
+    // console.log(`intro_movie transition ${step}`);
+    if (step > scene_steps[scene_idx]) {
+      scene_idx += 1;
+      step = 0;
+    }
+    if (scene_idx == scene_steps.length) {
+      cfg.minsolution = false;
+      plot.touch++;
+      return;
+    }
+
+    const timeout = step == 0 ? 800 : 10;
+    const progress = step / scene_steps[scene_idx];
+    scenes[scene_idx](progress);
+    s.notify();
+    setTimeout(() => transition(scene_idx, step+1), timeout);
+  }
+
+  transition(0, 0);
+}
+
+
 function update() {
   if (! mounted) return;
   var cmd = cfg.cmd;
@@ -48,6 +123,7 @@ function update() {
   if (cmd == 'mu_tracks_x' && cfg.mu_tracks_x) plot.recenter_mu();
   if (cmd == 'scramble') plot.set_scramble(cfg.scramble);
   if (cmd == 'set_sigma') plot.set_sigma(cfg.log_sigma);
+  if (cmd == 'play_intro') intro_movie();
   if (cmd.match(/update_alpha/)) { 
     // do nothing
   }
@@ -143,6 +219,10 @@ $: resize(divw, divh);
     {/if}
   {/each}
 
+  {#if cfg.minsolution}
+    <path class="min-solution-curve" d="{plot.minSolutionCurve()}"/>
+  {/if}
+
   {#if cfg.solution}
     <path class="solution-curve" d="{plot.solutionCurve()}"/>
   {/if}
@@ -188,6 +268,12 @@ $: resize(divw, divh);
   .solution-curve {
     fill: none;
     stroke: rgba(0,0,255,1);
+    stroke-width: 2px;
+  }
+
+  .min-solution-curve {
+    fill: none;
+    stroke: rgba(255,140,0,1);
     stroke-width: 2px;
   }
 

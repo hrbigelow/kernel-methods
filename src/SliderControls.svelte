@@ -38,6 +38,7 @@ function h(evt) {
   <button class='right' id='reset_alpha' on:click={h}>Reset <K>{`\alpha`}</K></button>
   <button class='left' id='del_point' on:click={h}>Del Point</button>
   <button class='right' id='add_point' on:click={h}>Add Point</button>
+  <button class='left' id='play_intro' on:click={h}>Play Intro</button>
 </div>
 
 

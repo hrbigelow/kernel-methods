@@ -30,7 +30,7 @@ export class Plot {
     this.fft = mat.Matrix.zeros(this.n, this.n);
     this.invpft = mat.Matrix.zeros(this.n, this.n);
     this.curveCache = null; // cc[ci][xi] = y.  (curve_idx, x_idx)
-    this.xCache = null;
+    this.xCache = null; // xc[si][ei] = x. (seg_idx, entry_idx)
     this.invertible = true;
 
     this.populate();
@@ -143,6 +143,16 @@ export class Plot {
     this.initCurveCache();
   }
 
+  // set mu_i = factor * center + (1-factor) * x_i
+  push_mu_to_center(factor) {
+    const center = (this.ctx.xmin + this.ctx.xmax) / 2.0;
+    for (var i = 0; i != this.n; i++)
+      this.mu[i] = factor * center + (1.0 - factor) * this.x[i];
+    this.init_metrics();
+    this.initCurveCache();
+  }
+
+
   get_sigma2() {
     return this.kernels[this.active_ker].get_sigma2();
   }
@@ -199,10 +209,10 @@ export class Plot {
 
   // return the solution, or if failed,
   // plot.alpha
-  solutionAlpha() {
+  _solutionAlpha(metric_matrix) {
     var y = new mat.Matrix([this.y]);
     try {
-      var inv = mat.inverse(this.pft); 
+      var inv = mat.inverse(metric_matrix); 
       var alpha = y.mmul(inv).flat();
       self.invertible = true;
       return alpha;
@@ -214,6 +224,15 @@ export class Plot {
     }
 
   }
+
+  solutionAlpha() {
+    return this._solutionAlpha(this.pft);
+  }
+
+  minSolutionAlpha() {
+    return this._solutionAlpha(this.fft);
+  }
+
 
   _fNorm2() {
     var a = new mat.Matrix([this.alpha]);
@@ -328,6 +347,23 @@ export class Plot {
     }
     return this.makeLines(ys);
   }
+
+  minSolutionCurve() {
+    if (this.n == 0) return '';
+    var ys = new Array(this.curveCache[0].length).fill(0.0);
+    var alpha = this.minSolutionAlpha();  
+
+    for (let ci = 0; ci != this.n; ci++) {
+      var a = alpha[ci], seg = [];
+      for (let si = 0; si != this.xCache.length; si++) 
+        seg.push(...this.xCache[si].map(x => a * this.kernel(this.x[ci], x)));
+
+      for (let xi = 0; xi != ys.length; xi++)
+        ys[xi] += seg[xi];
+    }
+    return this.makeLines(ys);
+  }
+
   
   // return the u,v points for the i'th scaled curve
   points(i) {

@@ -18,7 +18,7 @@ $
 
 In this article, I introduce the main mathematical apparatus at the core of all Kernel Methods.  To me, the apparatus is best introduced as the inevitable consequence of three design goals, in the same way that a bicycle is the consequence of design goals ("a thing the rider must be able to steer, sit on, accelerate, and stop").
 
-I take a somewhat unconventional approach by first considering a slightly wider class, and then show that a narrower class (still with multiple choices) is the most optimal.  The Kernel method is one choice in this narrower class.  While any choice within this narrower class provides exactly the same solution to a problem, the Kernel method is the only computable member of this class.  This should hopefully make the Kernel Method seem less contrived and arbitrary.
+I take a somewhat unconventional approach by first considering a slightly wider class of models than the Kernel method, and then show that a narrower class (still with multiple choices) is the most optimal.  The Kernel method is one choice in this narrower class.  While any choice within this narrower class provides exactly the same solution to a problem, the Kernel method is the only computable member of this class.  This should hopefully make the Kernel Method seem less contrived and arbitrary.
 
 
 
@@ -26,33 +26,40 @@ There are two interactive visualizations in this article, using the 1-D Gaussian
 
 All Kernel methods, such as Kernel Regression, Kernel SVM, PCA, CCA, K-means use the same mathematical apparatus at the core, but solve a different linear problem.  In this article, I use the simplest among these, the perfect-fit Kernel Regression, as a worked example.  Since it is perfect-fit, it has the drawback of not using regularization.  Instead, I introduce the concept of regularization through function norm reduction while considering the design of the Kernel Method itself.   Imperfect-fit (least squares) regression, and other variations serve to further decrease the function norm, or achieve other objectives such as classification.
 
-A core concept of Kernel Methods is the so-called "feature space" - a (possibly) infinite dimensional vector space, whose points correspond one-to-one with functions.  There is a distinct concept called the Reproducing Kernel Hilbert Space.  The RKHS is a more abstract concept; it is also a vector space whose points correspond to the points in the feature space, and the functions.  The feature space and the RKHS are distinct, but represent aspects of the same underlying mathematical object.  But often in the literature, they are spoken about interchangeably, which was a major source of confusion.  I only mention them here to help the reader avoid the same confusion.
+A core concept of Kernel Methods is the so-called "feature space" - a (possibly) infinite dimensional vector space, whose points correspond one-to-one with functions.  There is a distinct concept called the Reproducing Kernel Hilbert Space.  The RKHS is a more abstract concept; it is also a vector space whose points correspond to the points in the feature space, and the functions.  The feature space and the RKHS are distinct, but represent aspects of the same underlying mathematical object.  But often in the literature, they are spoken about interchangeably, which was a major source of confusion.  At the end of this article is a short section drawing the distinction between these two notions.
 
 Kernel methods, particularly SVMs, were for a time a dominant model used in Machine Learning, but have been eclipsed by deep Neural networks trained by stochastic gradient descent.  More recently, it was recognized that NNs trained by SGD approximate Kernel methods, and this has led to increased interest and new applications.
 
 # An illustration of Kernel Regression
 
+${<slot name='figure1' />}$
+
 In the interactive figure, data points $(x_i, y_i)$ are shown as black dots.  There is one Gaussian centered at each $x_i$.  The blue curve is a linear combination $(\alpha_1, \cdots, \alpha_n)$ of these Gaussians.  Each slider controls one of the $\alpha_i$.
 
-You can adjust the sliders to make the blue curve perfectly fit the $y_i$.  It may be surprising to note that a unique, perfect-fitting $\alpha$ exists for any set of $(x_i, y_i)$ and for any number of points (click 'Add Points' and/or 'New Data' to adjust).
+The heatmap at the lower left is a complete space showing where the information in the main plot is situated.  It shows the values of all Gaussian curves of a particular $\sigma$, (0 to 1, white to blue scale).  Each horizontal line shows one curve centered at a particular $\mu$, with $\mu$ increasing downwards.  While the gray curves show the $\alpha_i$-scaled Gaussian, the heatmap shows these Gaussians unscaled so their peak height is 1 (blue color).  In this worked example of 1D Gaussians, the heatmap depicts the entire family of functions indexed by points in the input domain $\mathcal{X}$
 
-To see why, note that each gray curve's set of values along the $x_i$ produces a vector, which I call the function's *vector of evaluation*.  Denoting the j'th curve as $k_j(x)$, its vector of evaluation is $(k_j(x_1), k_j(x_2), \cdots, k_j(x_n))$, where the order of components is always the order of the $(x_1, x_2, \cdots, x_n)$.  
-${<slot name='figure1' />}$
+The red dots show the current locations of all combinations of $\mu_i$ (positions of triangles at the top of the plot) and $x_i$ (horizontal positions of the black dots).  The heatmap values at the dots in a particular row denote the *vector of evaluation* of Gaussian at $\mu_i$ - that is, height of the gray curve if its $\alpha_i$ were set to 1.  The matrix at the lower right shows these values, organized in the same way.  The same values can be seen as heights of the gray curves at each $x_i$.  Letting the matrix be $\mathrm{K}$, the vector of evalution of the blue curve is just $\alpha \mathrm{K}$.
+
+After explaining some background, there will be more explanation of the various interacting parts of this figure.  For one thing to try now, you can adjust the sliders to make the blue curve perfectly fit the $y_i$.  It may be surprising to note that a unique, perfect-fitting $\alpha$ exists for any set of $(x_i, y_i)$ and for any number of points (click 'Add Points' and/or 'New Data' to adjust).
+
+To see why, note that each gray curve's set of values along the $x_i$ produces a vector, which I call the function's *vector of evaluation*.  Denoting the j'th curve as $k_j(x)$, its vector of evaluation is $(k_j(x_1), k_j(x_2), \cdots, k_j(x_n))$, where the order of components is always the order of the $(x_1, x_2, \cdots, x_n)$.
+
 
 Note that there isn't any rule that the $x_i$ need be monotonically increasing.  They are simply given in some arbitrary order from the dataset. In the plot, they aren't labeled.  You can adjust the i'th slider and see which curve moves.  The point located horizontally at the peak of that curve is $(x_i, y_i)$.  Ultimately it doesn't matter for the purposes of illustration.  The important thing is that all the gray functions' vectors of evaluation are in the same order.
 
 Also note, although Gaussians are most often interpreted as probability distributions, in this article, there is no such interpretation, and there is no process of sampling from Gaussians.  We are simply using them as curves, like splines, to generate more complex shapes.  So, there is no requirement that they be normalized.
 
-Particularly for a collection of Gaussians all with the same $\sigma$, the set of these $n$ vectors are linearly independent.  This is not at all obvious, but please accept it for now.  Then, by the linear algebra expansion theorem, they span $\mathbb{R}^n$ and so can form any set of $(y_i)$.
+Particularly for a collection of Gaussians all with the same $\sigma$, the set of these $n$ vectors are linearly independent.  This is not at all obvious, but please accept it for now.  Thus, they form a basis for $\mathbb{R}^n$, therefore, every point in $\mathbb{R}^n$, including $(y_1, \cdots, y_n)$, has a unique expansion in terms of the basis.
 
 Explicitly:
 
 $$
 \begin{aligned}
 k_j(x) & & \mbox{Gaussians centered at $x_j$, $j = 1 .. n$} \\
+(k_j(x_i))_{i \in (1..n)} & & \mbox{function $k_j(\cdot)$'s vector of evalution, a 'basis' vector} \\
 f(x) & \equiv \sum_j { \alpha_j k_j(x) } & \mbox{the blue curve}\\
-f(x_i) & = \sum_j { \alpha_j k_j(x_i) } = y_i & \mbox{fitting the blue curve to the black points} \\
-\B{\alpha K} & = \B{y} , & \mbox{$\B{K}$: rows are vectors of evaluation} \\
+f(x_i) & = \sum_j { \alpha_j k_j(x_i) } = y_i & \mbox{expansion of $(y_1, \cdots, y_n)$ in terms of the basis} \\
+\B{\alpha K} & = \B{y} , & \mbox{in matrix form, $\B{K}$'s rows are vectors of evaluation} \\
 \end{aligned}
 $$
 
@@ -77,7 +84,7 @@ Of course, these permuted Gaussians don't have the same relationship with the or
 
 ## The three design choices underlying all Kernel methods
 
-Underlying all Kernel methods are three choices for how to construct the function to fit a given data set.  Like all machine learning methods, these chocies are guided by classic requirements.  First, the approach must be a "universal approximator", or as I call it, have arbitrary model capacity.  This means, the ability to perfectly fit any data set.  Second, it should be possible to regularize, meaning that the function gives useful interpolation behavior.  Finally, it should be computationally tractable.  The three design choices serve these requirements as you will see.
+Underlying all Kernel methods are three choices for how to construct the function to fit a given data set.  Like all machine learning methods, these choices are guided by classic requirements.  First, the approach must be a "universal approximator", or as I call it, have arbitrary model capacity.  This means, the ability to perfectly fit any data set.  Second, it should be possible to regularize, meaning that the function gives useful interpolation behavior.  Finally, it should be computationally tractable.  The three design choices serve these requirements as you will see.
 
 ### First design choice
 
@@ -85,7 +92,7 @@ Underlying all Kernel methods are three choices for how to construct the functio
 
 ### Second design choice
 
-***Members of the set exhibit linearly independent vectors of evaluation***. The members of the set have the following property:  For any value of $n$, and for any $n$ functions from the set, and for any choice of $n$ evaluation points in $\mathcal{X}$, the set of $n$ *vectors of evaluation* of the chosen functions should be linearly independent.  A "vector of evaluation" as explained above is my term for the vector of function values in the order of data set points, $(f_i(x_1), f_i(x_2), \cdots, f_i(x_n))$.  This design choice allows the approach to fit any data set, as argued above by appealing to the linear algebra expansion theorem.  This gives the approach arbitrary capacity.  As an aside, there are choices of families that don't have this property, but since we are speaking generally about the approach of Kernel methods, it is important that some families do exhibit this property.
+***Members of the set exhibit linearly independent vectors of evaluation***. The members of the set have the following property:  For any value of $n$, and for any $n$ functions from the set, and for any choice of $n$ evaluation points in $\mathcal{X}$, the set of $n$ *vectors of evaluation* of the chosen functions should be linearly independent.  A "vector of evaluation" as explained above is my term for the vector of function values in the order of data set points, $(f_i(x_1), f_i(x_2), \cdots, f_i(x_n))$.  This design choice allows the approach to fit any data set.  The vectors of evaluation form a basis in $\mathbb{R}^n$, so one can find a linear combination to form any possible setting of $(y_i)_{i \in (1..n)}$.  This gives the approach arbitrary capacity.  As an aside, there are choices of families that don't have this property, but since we are speaking generally about the approach of Kernel methods, it is important that some families do exhibit this property.
 
 ### Third design choice
 
@@ -161,23 +168,7 @@ And, some consequences from this:
 As a spoiler, it will be shown that the $\mu$-span and $x$-span are chosen to be the same subspace.  The motivation for this choice will be made clear, but it is helpful to distinguish the two conceptually at first.
 
 
-## Interactive Figure 1
-
-Figure 1 has three coordinated panels with different views of the same information.  In the main plot at the top, each gray curve is an individual Gaussian with mean $\mu_i$ indicated by the triangle at the top edge.  They all share the same $\sigma$, controlled by the slider.  Each gray curve is scaled by an $\alpha_i$ shown in a slider to the right.
-
-You may drag any triangle to change $\mu_i$ and the corresponding gray curve will follow.  The $(x_i, y_i)$ points are shown as black circles.  You may change them as well.  If $\mu$ tracks $x$ is checked, the triangles will follow.
-
-The blue curve is simply the sum of the gray curves.  Its shape is thus controlled by choices of the $\alpha_i$ and the $\mu_i$.  If auto solve is checked, the plot will set the $\alpha_i$ to values to fit the $(x_i, y_i)$ data.  While the sliders have a limited range for manual adjustment, the 'auto solve' may set them to very large values positive or negative values depending on the data.
-
-The heatmap at the lower left is a complete space showing where the information in the main plot is situated.  It shows the values of all Gaussian curves of a particular $\sigma$, (0 to 1, white to blue scale).  Each horizontal line shows one curve centered at a particular $\mu$, with $\mu$ increasing downwards.  While the gray curves show the $\alpha_i$-scaled Gaussian, the heatmap shows these Gaussians unscaled so their peak height is 1.  In this worked example of 1D Gaussians, the heatmap depicts the entire family of functions indexed by points in the input domain $\mathcal{X}$
-
-The red dots show the current locations of all combinations of $\mu_i$ and $x_i$.  The heatmap values at the dots in a particular row denote the *vector of evaluation* of Gaussian at $\mu_i$ - that is, height of the gray curve if its $\alpha_i$ were set to 1.  The matrix at the lower right shows these values, organized in the same way.  The same values can be seen as heights of the gray curves at each $x_i$.  Letting the matrix be $\mathrm{K}$, the vector of evalution of the blue curve is just $\alpha \mathrm{K}$.
-
-Notice that if all $\mu_i = x_i$ (check $\mu$ tracks $x$s), then the diagonals of this matrix are equal to 1 since each unscaled curve has a peak height of 1 at $x_i = \mu_i$.  Furthermore the matrix is symmetric since $\mathcal{N}(x; \mu, \sigma) = \mathcal{N}(\mu; x, \sigma)$.  It is not symmetric when $\mu_i \ne x_i$ in general.
-
-
-
-### Some experiments
+## Some experiments to try with Figure 1
 
 Here are some experiments that I found are useful to build intuition.  In the experiments where $\sigma$ is not the focus, I'll omit the mention of $\sigma$ and abbreviate the feature vector notation $\vec{\phi_\sigma}(x)$ as $\vec{\phi_x}$.  For linear combinations of feature vectors, I'll use the name of the corresponding function.  For example, $f = \sum_i { \alpha_i f_{\mu_i} }$, with feature vector $\sum_i { \alpha_i \V{\phi_{\mu_i}}}$ will be simply notated $\vec{\phi_f}$.
 
@@ -222,7 +213,7 @@ As mentioned before, this experiment is only for didactic purposes since Kernel 
 
 # Experiments to try with Figure 2
 
-${<slot name='figure2' />}$
+${<slot name="figure2" />}$
 
 Figure 2 left panel shows the same plot with just two functions.  The right panel shows the 2d $\mu$-span, with the gray vectors denoting $\V{\phi_{\mu_1}}$ and $\V{\phi_{\mu_2}}$, and the blue vector $\V{\phi_f} = \sum_i { \alpha_i \V{\phi_{\mu_i}}}$.  The black dot on the right panel shows the parameter vector which fits the data.  Not shown are the $x$-span or the $\V{\phi_{x_i}}$.  However, when $\mu_i = x_i$, they coincide.  In this case, the black dotted lines show the length of the projection of $\V{\phi_f}$ onto each of the $\V{\phi_{\mu_i}}$, which equals $f(x_i)$.  There are a few informative experiments to try.
 
@@ -388,10 +379,15 @@ The functions are defined as dot products between "feature vectors": $f_{x_i}(x)
 
 
 
-# Recommended reading and Notes
+# Recommended reading
 
-In the above essay I intentionally avoided some of the terminology and names of theorems.  When I was learning about Kernel methods, I found that they seemed to hint at giving insight, but ultimately they did not.  Here are some of the concepts, linking them to the above, or a critique why I didn't include them in the main text.
+First, I highly recommend the Youtube channel [MathTheBeautiful](https://www.youtube.com/channel/UCr22xikWUK2yUW4YxOKXclQ).  The playlists on Linear Algebra and Tensor Calculus are excellent and there are many fresh insights to be had here.  I started with the video on [dot products](https://www.youtube.com/watch?v=QPkKWGq_V0U), which derives the Dot Product as a purely geometric definition.
 
+The Youtube Kernel tutorial lecture series by [Julien Mairal](https://www.youtube.com/channel/UCotztBOmGVl9pPGIN4YqcRw) is an excellent introduction to Kernel methods, and covers a wide range of topics surrounding them.
+
+# Notes on a few common Concepts
+
+In this article I intentionally avoided some of the terminology and names of theorems.  When I was learning about Kernel methods, I found that they seemed to hint at giving insight, but ultimately they did not.  Here are some of the concepts, linking them to the above, or a critique why I didn't include them in the main text.
 
 ## Positive (semi)Definite matrices
 
@@ -415,6 +411,14 @@ Now that the Hilbert space has a set of basis vectors $(f_{x_i})$, and an inner 
 ## Representer Theorem
 
 In the parlance of RHKS theory, the point $f_x \in \mathcal{H}$ corresponding to a given $x \in \mathcal{X}$ is called $x$'s *representer* of evaluation, and more generally, any point in $\mathcal{H}$ is a *representation* of some function in an abstract way.  So, the Representer Theorem asserts that an optimal solution to a data fitting problem exists in the span of the representers of the data.  That is, in the span of $(f_{x_i})$.  The section on this article proving through orthogonal decomposition, that setting $\B{M} = \B{X}$ results in the minimum norm solution without any loss of expressive power, is a simplified version of this theorem.  For more detail, see:  https://alex.smola.org/papers/2001/SchHerSmo01.pdf
+
+## Original Source code for Article
+
+The original article was built using Google Colab (markdown plus $\LaTeX$), and Svelte for the interactive plots.  It is available at https://github.com/hrbigelow/kernel-methods.
+
+## Acknowledgments
+
+My understanding of Kernel Methods to this point required a lot of reading and puzzling over ideas.  My friend and colleague Alex Shim originally introduced me to the concept of the RKHS, and since then I have had many clarifying discussions and questions.  Ishaq Kothari provided valuable suggestions on an early draft of this article.
 
 
 
