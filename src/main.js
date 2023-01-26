@@ -1,6 +1,5 @@
 import App from './App.svelte';
 
-
 function get_target() {
   var sel;
   if (location.hostname.endsWith('ghost.io'))
@@ -17,4 +16,4 @@ const app = new App({
 });
 
 export default app;
-// export default { app, Curves };
+// export default { app, parser };

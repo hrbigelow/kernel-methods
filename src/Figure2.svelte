@@ -34,13 +34,13 @@ let sig = writable(0);
     <PhiSpace sig={sig} cn=2 cfg={cfg} pp={pp} gridarea='phi'/>
     <LowPanelControls sig={sig} cfg={cfg} cn=3 plot={pp.plot} gridarea='panel'/>
     <div class='caption'>Plane spanned by 
-      <K>{`\vec\phi_\sigma(\mu_1)`}</K> and
-      <K>{`\vec\phi_\sigma(\mu_2)`}</K>
+      <K>{String.raw`\vec\phi_\sigma(\mu_1)`}</K> and
+      <K>{String.raw`\vec\phi_\sigma(\mu_2)`}</K>
     </div>
   <figcaption class='figcap'> <b>Figure 2. Left</b>: The curves plot as before with only two curves.
-      <b>Right</b>: The plane in feature space spanned by vectors <K>{`\vec\phi(\mu_1)`}</K>
-          and <K>{`\vec\phi(\mu_2)`}</K> The blue arrow is 
-      <K>{`\alpha_1 \vec\phi(\mu_1) + \alpha_2 \vec\phi(\mu_2)`}</K>.
+      <b>Right</b>: The plane in feature space spanned by vectors <K>{String.raw`\vec\phi(\mu_1)`}</K>
+          and <K>{String.raw`\vec\phi(\mu_2)`}</K> The blue arrow is 
+      <K>{String.raw`\alpha_1 \vec\phi(\mu_1) + \alpha_2 \vec\phi(\mu_2)`}</K>.
   </figcaption>
 </figure>
 

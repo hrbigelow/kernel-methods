@@ -3,7 +3,7 @@
 </script>
 
 <div>
-  <Figure1 fullscreen=true/> 
+  <Figure1 fullscreen='true'/> 
 </div>
 
 

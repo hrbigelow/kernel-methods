@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  // import parser from 'ua-parser-js';
   import KernelMethods from './kernel_methods.md';
   // import KernelMethods from './test.md';
   import Figure1 from './Figure1.svelte';

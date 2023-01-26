@@ -60,7 +60,7 @@ const defaultPlugins = [
           if (filename.slice(-2) == 'md') {
             content = pre_md(content);
           } else {
-            content = pre_sv(content);
+            // content = pre_sv(content);
           }
 
           if (path.basename(filename) == debug_file)

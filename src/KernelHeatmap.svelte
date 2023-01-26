@@ -2,14 +2,15 @@
 import { onMount } from 'svelte';
 import GlslCanvas from 'glslCanvas';
 import { RBFKernel, RBFShuffleKernel } from './kernel'; 
+import parser from 'ua-parser-js';
 import kernel_frag from './shaders/kernel_frag.glsl';
 import { Sync } from './sync';
 import * as d3 from 'd3';
 
 export let sig, cn, plot, gridarea;
-let xmin, xmax, mounted = false;
+let xmin, xmax, mounted = false, ua_device;
 let sandbox;
-let svg, can, divh;
+let svg, divh, can = null;
 let s;
 
 function xTou(x) {
@@ -26,7 +27,8 @@ function resize(dummy) {
   var h = svg.clientHeight; // excludes border
   // console.log(`in KernelHeatmap resize with dummy=${dummy}, svg.clientHeight=${h}`);
   svg.setAttribute('width', h);
-  can.setAttribute('width', h);
+  if (can !== null)
+    can.setAttribute('width', h);
   update();
 }
 
@@ -48,12 +50,16 @@ function update() {
 
 onMount(() => {
   s = new Sync(sig, cn, update);
-  var gl = can.getContext('webgl') || can.getContext('experimental-webgl');
+  console.log(`type of can = ${typeof can}`);
+  var gl = can === null ? null : can.getContext('webgl') || can.getContext('experimental-webgl');
   if (gl && gl instanceof WebGLRenderingContext) {
     sandbox = new GlslCanvas(can);
     sandbox.load(kernel_frag);
   }
   mounted = true;
+  ua_device = new parser().getDevice().type;
+  // console.log(`ua_device type: ${ua_device}`);
+
   resize(divh);
 });
 
@@ -68,7 +74,9 @@ $: resize(divh);
   height change.
 -->
 <div class='{gridarea} invis-framed' bind:clientHeight={divh}></div>
-<canvas class='{gridarea} framed z1' bind:this={can}></canvas>
+{#if ua_device === undefined || ua_device === 'console'}
+  <canvas class='{gridarea} framed z1' bind:this={can}></canvas>
+{/if}
 <svg class='{gridarea} framed z2' bind:this={svg}>
   {#if mounted}
     {#each plot.x as x}

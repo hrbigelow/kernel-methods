@@ -23,7 +23,7 @@ function h(evt) {
 <div class='gb {gridarea}'>
   {#each plot.alpha as a, i}
     <div class='alpha'>
-        <label class='ib'><K>{`\alpha_`}{i}</K>
+        <label class='ib'><K>{String.raw`\alpha_`}{i}</K>
         <input id='update_alpha{i}'
                class='ib slider'
                type=range
@@ -35,7 +35,7 @@ function h(evt) {
     </div>
   {/each}
   <button class='left' id='new_data' on:click={h}>New Data</button>
-  <button class='right' id='reset_alpha' on:click={h}>Reset <K>{`\alpha`}</K></button>
+  <button class='right' id='reset_alpha' on:click={h}>Reset <K>\alpha</K></button>
   <button class='left' id='del_point' on:click={h}>Del Point</button>
   <button class='right' id='add_point' on:click={h}>Add Point</button>
   <button class='left' id='play_intro' on:click={h}>Play Intro</button>
